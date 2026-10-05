@@ -1,6 +1,6 @@
 local ant = {
     Name = "Build An Ant Empire",
-    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/2ea98df155bf4da825c139f86f0cd306e85bc596/Nope%20HUB.lua",
+    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/ae04373f997ae03f662e59f4b0702b75d3349003/Nope%20HUB.lua",
 }
 local kaiju = {
     Name = "Kaiju Alpha",
