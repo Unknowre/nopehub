@@ -9,9 +9,13 @@ local supported = {
     },
 }
 
+local supportedUniverses = {
+    [10732236937] = supported[127403135954624],
+}
+
 repeat task.wait() until game:IsLoaded()
 
-local entry = supported[game.PlaceId]
+local entry = supported[game.PlaceId] or supportedUniverses[game.GameId]
 if not entry then
     local message = "Nope HUB: This map is not supported (PlaceId: " .. tostring(game.PlaceId) .. ")"
     warn(message)
