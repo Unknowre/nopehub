@@ -1,33 +1,15 @@
-local supported = {
-    [127403135954624] = {
-        Name = "Kaiju Alpha",
-        Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/kaiju.obfuscated.lua",
-    },
-    [78490532994307] = {
-        Name = "Build An Ant Empire",
-        Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/Nope%20HUB.lua",
-    },
+local ant = {
+    Name = "Build An Ant Empire",
+    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/Nope%20HUB.lua",
 }
-
-local supportedUniverses = {
-    [10732236937] = supported[127403135954624],
+local kaiju = {
+    Name = "Kaiju Alpha",
+    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/kaiju.obfuscated.lua",
 }
 
 repeat task.wait() until game:IsLoaded()
 
-local entry = supported[game.PlaceId] or supportedUniverses[game.GameId]
-if not entry then
-    local message = "Nope HUB: This map is not supported (PlaceId: " .. tostring(game.PlaceId) .. ")"
-    warn(message)
-    pcall(function()
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Nope HUB",
-            Text = "This map is not supported",
-            Duration = 6,
-        })
-    end)
-    return
-end
+local entry = game.PlaceId == 78490532994307 and ant or kaiju
 
 local ok, source = pcall(function() return game:HttpGet(entry.Url) end)
 if not ok or type(source) ~= "string" or source == "" then
