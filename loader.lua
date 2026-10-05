@@ -1,4 +1,8 @@
 local supported = {
+    [127403135954624] = {
+        Name = "Kaiju Alpha",
+        Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/kaiju.obfuscated.lua",
+    },
     [78490532994307] = {
         Name = "Build An Ant Empire",
         Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/Nope%20HUB.lua",
