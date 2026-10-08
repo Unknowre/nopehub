@@ -9,7 +9,7 @@ local entry
 if game.GameId == 3457700596 then
     entry = {
         Name = "Fruit Battlegrounds",
-        Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/fruit-battlegrounds.lua",
+        Url = "https://raw.githubusercontent.com/Unknowre/nopehub/00f09212e1568ec54ae353776ec40b396559c7c7/FRG.obfuscated.lua",
     }
 elseif game.PlaceId == 78490532994307 then
     entry = ant
