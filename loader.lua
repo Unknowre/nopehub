@@ -1,6 +1,6 @@
 local ant = {
     Name = "Build An Ant Empire",
-    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/c753cd9f4b0b7c096db0a45779831a2235508762/Nope%20HUB.lua",
+    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/b239dd4d22247e6e5b4369a6306db69a42193915/Nope%20HUB.lua",
 }
 
 repeat task.wait() until game:IsLoaded()
