@@ -1,95 +1,3 @@
-repeat task.wait() until game:IsLoaded()
-if makefolder then for _, p in ipairs({"NopeHub", "NopeHub/UIOnly", "NopeHub/UIOnly/keys"}) do pcall(makefolder, p) end end
-local function Authenticate()
-    repeat task.wait() until game:IsLoaded()
-    local env = getgenv and getgenv() or _G
-    if env.NOPE_HUB_UI_CLEANUP then pcall(env.NOPE_HUB_UI_CLEANUP) end
-    local active, accepted, busy = true, false, false
-    local sdk, library
-    local keyPath = "NopeHub/UIOnly/keys/" .. tostring(game.Players.LocalPlayer.UserId) .. ".txt"
-    local function alive()
-        return active and (not STATE or STATE.alive())
-    end
-    local function cleanup()
-        active = false
-        if library then pcall(function() library:Destroy() end) end
-        if sdk then pcall(function() sdk.disconnect() end) end
-    end
-    env.NOPE_HUB_UI_CLEANUP = cleanup
-    if STATE then STATE.onCleanup(cleanup) end
-    if setthreadidentity then setthreadidentity(8) end
-    library = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-    local window = library:CreateWindow({Title = "NopeHUB", SubTitle = "Fruit battleground", TabWidth = 140, Size = UDim2.fromOffset(520, 350), Acrylic = false, Theme = "Dark", MinimizeKey = Enum.KeyCode.RightShift})
-    library.GUI.Name = "NopeHubKeySystem"
-    local tab = window:AddTab({Title = "Key", Icon = "key"})
-    local input = tab:AddInput("LicenseKey", {Title = "Key", Default = "", Placeholder = "Enter your key", Finished = false})
-    local remember = tab:AddToggle("RememberKey", {Title = "Remember Key", Default = true})
-    local function notify(message)
-        if alive() then
-            if setthreadidentity then setthreadidentity(8) end
-            library:Notify({Title = "Nope HUB", Content = message, Duration = 5})
-        end
-    end
-    local function getSdk()
-        if sdk then return sdk end
-        local value = loadstring(game:HttpGet("https://secure.pandauth.com/pv4/lib"))()
-        assert(type(value) == "table" and type(value.configure) == "function", "Panda SDK unavailable")
-        value.configure({serviceId = "nopehub", debug = false, kickOnDetect = false})
-        if not alive() then pcall(value.disconnect) error("Key window closed") end
-        sdk = value
-        return sdk
-    end
-    local function verify(key)
-        if busy or not alive() or accepted then return end
-        key = tostring(key or ""):match("^%s*(.-)%s*$")
-        if key == "" then notify("Enter your key") return end
-        busy = true
-        task.spawn(function()
-            local reason = "NETWORK"
-            for attempt = 1, 3 do
-                if not alive() then busy = false return end
-                local ok, result = pcall(function() return getSdk().validate(key) end)
-                if not alive() then busy = false return end
-                if ok and type(result) == "table" and result.success == true then
-                    if remember.Value and type(writefile) == "function" then
-                        pcall(writefile, keyPath, key)
-                    elseif type(isfile) == "function" and type(delfile) == "function" then
-                        pcall(function() if isfile(keyPath) then delfile(keyPath) end end)
-                    end
-                    accepted, busy = true, false
-                    return
-                end
-                reason = ok and type(result) == "table" and (result.reason or result.error) or "NETWORK"
-                if reason == "INVALID_KEY" or reason == "NO_KEY" or reason == "NO_SERVICE" then break end
-                if attempt < 3 then task.wait(attempt * 2) end
-            end
-            busy = false
-            if reason == "INVALID_KEY" then
-                notify("Key invalid, expired, or linked to another device")
-            else
-                notify("Unable to verify: " .. tostring(reason) .. ". Try again.")
-            end
-        end)
-    end
-    tab:AddButton({Title = "Verify Key", Callback = function() verify(input.Value) end})
-    tab:AddButton({Title = "Close", Callback = cleanup})
-    window:SelectTab(1)
-    if type(isfile) == "function" and type(readfile) == "function" then
-        local ok, saved = pcall(function() return isfile(keyPath) and readfile(keyPath) or nil end)
-        if ok and type(saved) == "string" and saved ~= "" then
-            input:SetValue(saved)
-            verify(saved)
-        end
-    end
-    while alive() and not accepted and not library.Unloaded do task.wait(0.1) end
-    if not accepted or not alive() then cleanup() return nil end
-    if setthreadidentity then setthreadidentity(8) end
-    library:Destroy()
-    library = nil
-    env.NOPE_HUB_UI_CLEANUP = nil
-    return sdk
-end
-
 local function createHubButton(Window, parent)
     local UIS = game:GetService("UserInputService")
     local gui = Instance.new("ScreenGui")
@@ -147,9 +55,11 @@ local function createHubButton(Window, parent)
     end
 end
 
-local function Boot(sdk)
+local function Boot()
     local Http = game:GetService("HttpService")
     local env = getgenv and getgenv() or _G
+    if env.NOPE_HUB_UI_CLEANUP then pcall(env.NOPE_HUB_UI_CLEANUP) end
+    if makefolder then for _, path in ipairs({"NopeHub", "NopeHub/UIOnly"}) do pcall(makefolder,path) end end
     if setthreadidentity then setthreadidentity(8) end
     local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
     local Window = Fluent:CreateWindow({Title = "NopeHUB", SubTitle = "Fruit battleground", TabWidth = 160, Size = UDim2.fromOffset(640, 500), Acrylic = false, Theme = "Dark", MinimizeKey = Enum.KeyCode.RightShift})
@@ -165,7 +75,7 @@ local function Boot(sdk)
         active = false
         for _, fn in ipairs(cleanupTasks) do pcall(fn) end
         pcall(function() Fluent:Destroy() end)
-        pcall(function() sdk.disconnect() end)
+
     end
     env.NOPE_HUB_UI_CLEANUP = cleanup
     if STATE then STATE.onCleanup(cleanup) end
@@ -867,22 +777,17 @@ local function Boot(sdk)
         while active and not Fluent.Unloaded and (not STATE or STATE.alive()) do
             task.wait(5)
             if not active then return end
-            local ok, expired = pcall(function() return sdk.isExpired() end)
-            if ok and expired then cleanup() warn("Nope HUB: Key expired. Run again to enter a new key.") return end
         end
         cleanup()
     end)
 end
 
+repeat task.wait() until game:IsLoaded()
 task.spawn(function()
-    local ok, sdk = pcall(Authenticate)
-    if not ok then warn("Nope HUB: " .. tostring(sdk)) return end
-    if not sdk then return end
-    local success, err = pcall(Boot, sdk)
-    if not success then
+    local ok, err = pcall(Boot)
+    if not ok then
         local env = getgenv and getgenv() or _G
         if env.NOPE_HUB_UI_CLEANUP then pcall(env.NOPE_HUB_UI_CLEANUP) end
-        pcall(function() sdk.disconnect() end)
-        warn("Nope HUB: " .. tostring(err))
+        warn("NopeHUB: " .. tostring(err))
     end
 end)
