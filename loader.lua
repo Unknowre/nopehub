@@ -2,14 +2,14 @@ local ant = {
     Name = "Build An Ant Empire",
     Url = "https://raw.githubusercontent.com/Unknowre/nopehub/ae04373f997ae03f662e59f4b0702b75d3349003/Nope%20HUB.lua",
 }
-local kaiju = {
-    Name = "Kaiju Alpha",
-    Url = "https://raw.githubusercontent.com/Unknowre/nopehub/main/kaiju.obfuscated.lua",
-}
 
 repeat task.wait() until game:IsLoaded()
 
-local entry = game.PlaceId == 78490532994307 and ant or kaiju
+if game.PlaceId ~= 78490532994307 then
+    warn("Nope HUB: This map is not supported")
+    return
+end
+local entry = ant
 
 local ok, source = pcall(function() return game:HttpGet(entry.Url) end)
 if not ok or type(source) ~= "string" or source == "" then
